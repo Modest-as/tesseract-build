@@ -1,0 +1,42 @@
+#!/bin/bash
+
+cd /mount
+
+rm -rf *
+
+mkdir tesseract && mkdir headers
+
+wget http://www.leptonica.com/source/leptonica-1.75.3.tar.gz
+
+tar xzvf leptonica-1.75.3.tar.gz && rm leptonica-1.75.3.tar.gz
+
+cd leptonica-1.75.3
+
+./configure
+
+make && make install
+
+export PKG_CONFIG_PATH=/usr/local/lib/pkgconfig/
+
+cp src/.libs/liblept.* ../tesseract/ && cd ..
+
+git clone https://github.com/tesseract-ocr/tesseract tesseract-src
+
+cd tesseract-src
+
+git checkout tags/4.0.0-beta.4
+
+./autogen.sh && ./configure
+
+make && make install
+
+cp src/api/.libs/libtesseract.* ../tesseract
+cp src/api/.libs/tesseract ../tesseract
+cp -r /usr/local/include/leptonica ../headers/leptonica
+cp -r /usr/local/include/tesseract ../headers/tesseract 
+
+cd ../tesseract
+
+export LC_ALL=C && export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$PWD
+
+ldd libtesseract.so
